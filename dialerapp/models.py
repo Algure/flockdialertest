@@ -11,5 +11,6 @@ class User(models.Model):
 class Company(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=50)
     playlist = models.TextField()
     
