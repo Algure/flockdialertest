@@ -7,6 +7,7 @@ class User(models.Model):
     company_id = models.CharField(max_length=50)
     company_name = models.CharField(max_length = 100)
     session_duration = models.CharField(max_length=50)
+    is_admin = models.BooleanField(default = False, )
 
 class Company(models.Model):
     id = models.AutoField(primary_key=True)

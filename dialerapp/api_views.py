@@ -33,12 +33,14 @@ class UserCreate(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         try:
-            phone = request.data.get('phone')
-            queryset = User.objects.filter(name='Helen')
-            if price is not None and float(price) <= 0.0:
-                raise ValidationError({ 'price': 'Must be above $0.00' })
+            user_phone = request.data.get('phone')
+            queryset = User.objects.filter(phone = user_phone)
+            assert((str(user_phone)).startswith('+')) # User phone number must start with +
+
+            if user_phone is None or len(queryset.values_list()) > 0:
+                raise ValidationError({ 'user phone number exists' })
         except ValueError:
-            raise ValidationError({ 'price': 'A valid number is required' })
+            raise ValidationError({ 'user_phone': 'A valid number is required' })
         return super().create(request, *args, **kwargs)
 
 class CompanyList(ListAPIView):
@@ -56,3 +58,15 @@ class CompanyRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
 
 class CompanyCreate(CreateAPIView):
     serializer_class = CompanySerializer
+
+    def create(self, request, *args, **kwargs):
+            try:
+                company_phone = request.data.get('phone')
+                queryset = Company.objects.filter(phone = company_phone)
+                assert((str(company_phone)).startswith('+')) # Company phone number must start with +
+                
+                if company_phone is None or len(queryset.values_list()) > 0:
+                    raise ValidationError({ 'Company phone number already exists' })
+            except ValueError:
+                raise ValidationError({ 'company_phone': 'A valid number is required' })
+            return super().create(request, *args, **kwargs)
