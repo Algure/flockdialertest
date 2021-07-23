@@ -5,11 +5,33 @@ from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
+from django.http import HttpResponse
+from django.http import Http404
+
 from dialerapp.models import User
 from dialerapp.models import Company
 from dialerapp.serializers import UserSerializer
 from dialerapp.serializers import CompanySerializer
 
+
+def login(request):
+    try:
+        user_email = str(request.query_params.get('user_email', None))
+        password = str(request.query_params.get('user_pass', None))
+        if user_email is None or password is None :
+            raise ValueError({ 'invalid input.' })
+
+        user_object_collection = User.objects.filter(email = user_email).values_list()
+        if len(user_object_collection) <= 0:
+             raise ValidationError({ 'User does not exist' })
+
+        stored_password = str(user_object_collection[0]['password']);
+        if stored_password != password:
+            raise ValidationError({ 'Password does not match' })
+
+        return UserSerializer(user_object_collection[0]).to_representation()
+    except ValueError:
+        raise ValidationError({ 'user_email': 'A valid input is required' , 'user_pass' : 'A valid input is required'})
 
 class DataPagination(LimitOffsetPagination):
     default_limit = 10
@@ -34,14 +56,18 @@ class UserCreate(CreateAPIView):
     def create(self, request, *args, **kwargs):
         try:
             user_phone = request.data.get('phone')
+            user_email = request.data.get('email')
             queryset = User.objects.filter(phone = user_phone)
+            queryset2 = User.objects.filter(email = user_email)
             assert((str(user_phone)).startswith('+')) # User phone number must start with +
-
             if user_phone is None or len(queryset.values_list()) > 0:
                 raise ValidationError({ 'user phone number exists' })
+            elif len(queryset2.values_list()) > 0:
+                 raise ValidationError({ 'user email exists' })
         except ValueError:
             raise ValidationError({ 'user_phone': 'A valid number is required' })
         return super().create(request, *args, **kwargs)
+
 
 class CompanyList(ListAPIView):
     queryset = Company.objects.all()
