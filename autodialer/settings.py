@@ -4,27 +4,43 @@ from pathlib import Path
 import os
 import sys
 import dj_database_url
+import environ
+from environ import Path
+from decouple import config
+
+
+# root_path = environ.Path(__file__) - 2
+# env = environ.Env(DEBUG=(bool, False), DJANGO_ENV=(str, 'dev')) # set default values and casting
+# environ.Env.read_env(root_path('.env'))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False)
+)
+# reading .env file
+environ.Env.read_env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'pftgauqgw@)(p92@a4l2!!ilqh-+lhv8b_my-o*oh-&xx0x2x1'
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
+
+SECRET_KEY = config("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
-DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = env("DEBUG", "False") == "True"
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 
-DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
+DEVELOPMENT_MODE = config("DEVELOPMENT_MODE", "False") == "True"
 # Application definition
 
 INSTALLED_APPS = [
